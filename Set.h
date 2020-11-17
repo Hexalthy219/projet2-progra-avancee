@@ -68,7 +68,7 @@ size_t sizeOfSet(const Set* set);
  * OLD             If the element inserted was already in the set
  * ALLOC_ERROR     If an allocation error occured
  * ------------------------------------------------------------------------- */
-insert_t insertInSet(Set* set, const char* element);
+insert_t insertInSet(Set* set, char* element);
 
 
 
