@@ -105,5 +105,9 @@ StringArray* setIntersection(const Set* set1, const Set* set2);
 
 
 
+void test_affichage(const StringArray *test);
+
+
+
 
 #endif // !_SET_H_

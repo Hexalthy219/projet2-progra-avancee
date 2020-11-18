@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "Set.h"
 
@@ -105,6 +106,7 @@ static Noeud *rotation_droite(Noeud *noeud){
     noeud->parent = new_noeud;
 
     ajustement_hauteur(noeud);
+    
 
     return new_noeud;
 }
@@ -112,53 +114,66 @@ static Noeud *rotation_droite(Noeud *noeud){
 static Noeud *rotation_gauche(Noeud *noeud){
     Noeud *new_noeud = noeud->fils_droit;
     noeud->fils_droit = new_noeud->fils_gauche;
-    new_noeud = noeud;
+    new_noeud->fils_gauche = noeud;
 
     new_noeud->parent = noeud->parent;
     noeud->parent = new_noeud;
 
     ajustement_hauteur(noeud);
+    
 
     return new_noeud;
 }
 
 static void equilibrague_arbre(Noeud *noeud){
-    if(!noeud)
-        return;
+    int balance;
+    size_t h_droite, h_gauche;
 
-    int balance = 0;
-    
-    if(!noeud->fils_droit)
-        balance += noeud->fils_droit->h;
-    if(!noeud->fils_gauche)
-        balance -= noeud->fils_gauche->h;
-    
-    if(balance>1)
-        rotation_gauche(noeud);
-    else if(balance<-1)
-        rotation_droite(noeud);
-
-    equilibrague_arbre(noeud->parent);
+    while(noeud){
+        balance = 0, h_droite = 0, h_gauche = 0;
+        if(noeud->fils_droit)
+            balance += noeud->fils_droit->h;
+        if(noeud->fils_gauche)
+            balance -= noeud->fils_gauche->h;
+        if(balance>1){
+            if(noeud->fils_droit->fils_droit)
+                h_droite = noeud->fils_droit->fils_droit->h + 1;
+            if(noeud->fils_droit->fils_gauche)
+                h_gauche = noeud->fils_droit->fils_gauche->h + 1;
+            if(h_gauche>h_droite)
+                rotation_droite(noeud->fils_droit);
+            noeud = rotation_gauche(noeud);
+        }
+        else if(balance<-1){
+            if(noeud->fils_gauche->fils_droit)
+                h_droite = noeud->fils_gauche->fils_droit->h + 1;
+            if(noeud->fils_gauche->fils_gauche)
+                h_gauche = noeud->fils_gauche->fils_gauche->h + 1;
+            if(h_gauche<h_droite)
+                rotation_gauche(noeud->fils_gauche);
+            noeud = rotation_droite(noeud);
+        }
+        noeud = noeud->parent;
+    }
 }
 
 static void ajustement_hauteur(Noeud *noeud){
-    size_t h_droit = 0, h_gauche = 0;
-
+    size_t h_droite = 0, h_gauche = 0;
     while(noeud){
         if(noeud->fils_droit)
-            h_droit = noeud->fils_droit->h++;
+            h_droite = noeud->fils_droit->h + 1;
         if(noeud->fils_gauche)
-            h_gauche = noeud->fils_gauche->h++;
+            h_gauche = noeud->fils_gauche->h + 1;
         
         /*
-        *max(h_gauche, h_droit) est la nouvelle hauteur du noeud.
-        *Si h_gauche==h_droit, alors les hauteurs des noeuds parents 
+        *max(h_gauche, h_droite) est la nouvelle hauteur du noeud.
+        *Si h_gauche==h_droite, alors les hauteurs des noeuds parents 
         *sont également inchangés et donc on sort de la boucle
         */
-        if(h_gauche>h_droit)
+        if(h_gauche>h_droite)
             noeud->h = h_gauche;
-        else if(h_gauche<h_droit)
-            noeud->h = h_droit;
+        else if(h_gauche<h_droite)
+            noeud->h = h_droite;
         else 
             break;
 
@@ -200,7 +215,7 @@ insert_t insertInSet(Set* set, char* element){
     new->fils_droit = new->fils_gauche = NULL;
     new->h = 0;
     if(!actuel){
-        actuel=new;
+        set->racine=new;
         return NEW;
     }
     
@@ -234,5 +249,28 @@ bool contains(const Set* set, const char* element){
 }
 
 StringArray* setIntersection(const Set* set1, const Set* set2){
+
+
     
 }
+
+static void affichage_arbre(Noeud *noeud, int h){
+    printf("%s\t%ld\n", noeud->cle, noeud->h);
+    if(noeud->fils_gauche){
+        printf("jeanne au secours\n");
+        affichage_arbre(noeud->fils_gauche, h+1);
+    }
+    if(noeud->fils_droit)
+        affichage_arbre(noeud->fils_droit, h+1);
+}
+
+void test_affichage(const StringArray *test){
+    Set *arbre_test = createEmptySet();
+    size_t taille = arrayLength(test);
+    for(size_t i = 0; i<taille; i++){
+        insertInSet(arbre_test, getElementInArray(test, i));
+    }
+
+    affichage_arbre(arbre_test->racine, 0);
+}
+
