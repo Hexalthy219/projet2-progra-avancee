@@ -11,7 +11,6 @@ struct noeud_t{
     size_t h;
 };
 
-
 struct set_t{
     Noeud *racine;
     size_t taille;
@@ -98,19 +97,29 @@ size_t sizeOfSet(const Set* set){
 }
 
 static Noeud *rotation_droite(Noeud *noeud){
-    Noeud *tmp = noeud->fils_droit;
-    noeud->fils_droit = tmp->fils_gauche;
-    tmp = noeud;
+    Noeud *new_noeud = noeud->fils_gauche;
+    noeud->fils_gauche = new_noeud->fils_droit;
+    new_noeud->fils_droit = noeud;
 
-    return tmp;
+    new_noeud->parent = noeud->parent;
+    noeud->parent = new_noeud;
+
+    ajustement_hauteur(noeud);
+
+    return new_noeud;
 }
 
 static Noeud *rotation_gauche(Noeud *noeud){
-    Noeud *tmp = noeud->fils_gauche;
-    noeud->fils_gauche = tmp->fils_droit;
-    tmp = noeud;
+    Noeud *new_noeud = noeud->fils_droit;
+    noeud->fils_droit = new_noeud->fils_gauche;
+    new_noeud = noeud;
 
-    return tmp;
+    new_noeud->parent = noeud->parent;
+    noeud->parent = new_noeud;
+
+    ajustement_hauteur(noeud);
+
+    return new_noeud;
 }
 
 static void equilibrague_arbre(Noeud *noeud){
@@ -203,7 +212,7 @@ insert_t insertInSet(Set* set, char* element){
     set->taille++;
 
     ajustement_hauteur(actuel);
-    equilibrague_arbre(set);
+    equilibrague_arbre(actuel);
 
     return NEW;
 }
