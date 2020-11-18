@@ -99,5 +99,10 @@ void shuffleArray(StringArray* array)
   }
 }
 
+StringArray* getIntersection(const StringArray* array1, const StringArray* array2){
+  
+  
+  return NULL;
+}
 
 

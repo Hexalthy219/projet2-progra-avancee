@@ -8,6 +8,7 @@ typedef struct noeud_t Noeud;
 struct noeud_t{
     Noeud *parent, *fils_gauche, *fils_droit;
     char *cle;
+    size_t h;
 };
 
 
@@ -25,6 +26,42 @@ struct set_t{
  *
  * ------------------------------------------------------------------------- */
 static void suppresion_recursive(Noeud *noeud);
+
+/* ------------------------------------------------------------------------- *
+ *  La fonction réquilibre l'arbre afin de garder une hauteur max de 1.44*log(n+2)
+ *
+ * PARAMETERS
+ * noeud           pointeur valide vers une struct Noeud
+ *
+ * ------------------------------------------------------------------------- */
+static void equilibrague_arbre(Noeud *noeud);
+
+/* ------------------------------------------------------------------------- *
+ * Applique une rotation droite de réiquilibrage sur "noeud"
+ *
+ * PARAMETERS
+ * noeud           pointeur valide vers une struct Noeud
+ *
+ * ------------------------------------------------------------------------- */
+static Noeud *rotation_droite(Noeud *noeud);
+
+/* ------------------------------------------------------------------------- *
+ * Applique une rotation gauche de réiquilibrage sur "noeud"
+ *
+ * PARAMETERS
+ * noeud           pointeur valide vers une struct Noeud
+ *
+ * ------------------------------------------------------------------------- */
+static Noeud *rotation_gauche(Noeud *noeud);
+
+/* ------------------------------------------------------------------------- *
+ * reajuste les hauteurs des noeuds parents de noeud
+ *
+ * PARAMETERS
+ * noeud           pointeur valide vers une struct Noeud
+ *
+ * ------------------------------------------------------------------------- */
+static void ajustement_hauteur(Noeud *noeud);
 
 
 Set* createEmptySet(void){
@@ -59,22 +96,75 @@ void freeSet(Set* set){
 size_t sizeOfSet(const Set* set){
     return set->taille;
 }
-/**
- * 
- * 
- * FAUT FAIRE LA FONCTION BALANCE LES FDP(HORS DES FRONTIERES), EH OUAIS JE SAIS QUE ÇA VOUS SOULE MAIS FAUT ARRÊTER DE SE BRANLER
- * 
- * 
- * 
- */
+
+static Noeud *rotation_droite(Noeud *noeud){
+    Noeud *tmp = noeud->fils_droit;
+    noeud->fils_droit = tmp->fils_gauche;
+    tmp = noeud;
+
+    return tmp;
+}
+
+static Noeud *rotation_gauche(Noeud *noeud){
+    Noeud *tmp = noeud->fils_gauche;
+    noeud->fils_gauche = tmp->fils_droit;
+    tmp = noeud;
+
+    return tmp;
+}
+
+static void equilibrague_arbre(Noeud *noeud){
+    if(!noeud)
+        return;
+
+    int balance = 0;
+    
+    if(!noeud->fils_droit)
+        balance += noeud->fils_droit->h;
+    if(!noeud->fils_gauche)
+        balance -= noeud->fils_gauche->h;
+    
+    if(balance>1)
+        rotation_gauche(noeud);
+    else if(balance<-1)
+        rotation_droite(noeud);
+
+    equilibrague_arbre(noeud->parent);
+}
+
+static void ajustement_hauteur(Noeud *noeud){
+    size_t h_droit = 0, h_gauche = 0;
+
+    while(noeud){
+        if(noeud->fils_droit)
+            h_droit = noeud->fils_droit->h++;
+        if(noeud->fils_gauche)
+            h_gauche = noeud->fils_gauche->h++;
+        
+        /*
+        *max(h_gauche, h_droit) est la nouvelle hauteur du noeud.
+        *Si h_gauche==h_droit, alors les hauteurs des noeuds parents 
+        *sont également inchangés et donc on sort de la boucle
+        */
+        if(h_gauche>h_droit)
+            noeud->h = h_gauche;
+        else if(h_gauche<h_droit)
+            noeud->h = h_droit;
+        else 
+            break;
+
+    noeud = noeud->parent;
+    }
+}   
+
 insert_t insertInSet(Set* set, char* element){
     Noeud *actuel = set->racine;
     int comparaison;
     int fils;
+
+    //recherche du noeud devant recevoir un nouveau fils
     while(actuel){
         comparaison = strcmp(element, actuel->cle);
-        if(!comparaison)
-            return OLD;
         if(comparaison>0){
             if(actuel->fils_droit==NULL){
                fils = 1;
@@ -87,9 +177,11 @@ insert_t insertInSet(Set* set, char* element){
                fils = -1;
                break;  
             }
-            actuel = actuel->fils_gauche;  
+            actuel = actuel->fils_gauche;
         }
     }
+
+    //création du nouveau noeud
     Noeud *new = malloc(sizeof(Noeud));
     if(!new)
         return ALLOC_ERROR;
@@ -97,22 +189,39 @@ insert_t insertInSet(Set* set, char* element){
     new->cle = element;
     new->parent = actuel;
     new->fils_droit = new->fils_gauche = NULL;
+    new->h = 0;
     if(!actuel){
         actuel=new;
         return NEW;
     }
-
+    
+    //ajout du nouveau noeud au fils de droite ou de gauche de noeud "actuel"
     if(fils==1)
         actuel->fils_droit = new;
     else
         actuel->fils_gauche = new;
     set->taille++;
 
+    ajustement_hauteur(actuel);
+    equilibrague_arbre(set);
+
     return NEW;
 }
 
 bool contains(const Set* set, const char* element){
+    Noeud *actuel = set->racine;
+    int comparaison;
+    while(actuel){
+        comparaison = strcmp(element, actuel->cle);
+        if(!comparaison)
+            return true;
+        else if(comparaison>0)
+            actuel = actuel->fils_droit;
+        else
+            actuel = actuel->fils_gauche;
+    }
     
+    return false;
 }
 
 StringArray* setIntersection(const Set* set1, const Set* set2){
