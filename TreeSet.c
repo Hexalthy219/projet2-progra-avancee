@@ -98,31 +98,71 @@ size_t sizeOfSet(const Set* set){
 }
 
 static Noeud *rotation_droite(Noeud *noeud){
-    Noeud *new_noeud = noeud->fils_gauche;
-    noeud->fils_gauche = new_noeud->fils_droit;
-    new_noeud->fils_droit = noeud;
+    Noeud *tampon = malloc(sizeof(Noeud));
+    if(!tampon)
+        return NULL;
+    //mémorisation des informations du fils droit afin de faire une permutation
+    tampon->cle = noeud->fils_gauche->cle;
+    tampon->fils_droit = noeud->fils_gauche->fils_droit;
+    tampon->fils_gauche = noeud->fils_gauche->fils_gauche;
+    tampon->parent = noeud->fils_gauche->parent;
+    tampon->h = noeud->fils_gauche->h;
 
-    new_noeud->parent = noeud->parent;
-    noeud->parent = new_noeud;
 
-    ajustement_hauteur(noeud);
+
+    // Noeud *new_noeud = noeud->fils_gauche;
+    free(noeud->fils_gauche);
+    noeud->fils_gauche = NULL;
+    noeud->fils_gauche = tampon->fils_droit;
+    tampon->fils_droit = noeud;
+
+    tampon->parent = noeud->parent;
+    noeud->parent = tampon;
+    if(tampon->parent){
+        if(strcmp(tampon->parent->cle, tampon->cle)>0)
+            tampon->parent->fils_gauche = tampon;
+        else 
+            tampon->parent->fils_droit = tampon;
+    }  
+    tampon->fils_gauche->parent = tampon;
     
-
-    return new_noeud;
+    ajustement_hauteur(noeud);
+    ajustement_hauteur(tampon);
+    
+    return tampon;
 }
 
 static Noeud *rotation_gauche(Noeud *noeud){
-    Noeud *new_noeud = noeud->fils_droit;
-    noeud->fils_droit = new_noeud->fils_gauche;
-    new_noeud->fils_gauche = noeud;
+    Noeud *tampon = malloc(sizeof(Noeud));
+    if(!tampon)
+        return NULL;
+    //mémorisation des informations du fils droit afin de faire une permutation
+    tampon->cle = noeud->fils_droit->cle;
+    tampon->fils_droit = noeud->fils_droit->fils_droit;
+    tampon->fils_gauche = noeud->fils_droit->fils_gauche;
+    tampon->parent = noeud->fils_droit->parent;
+    tampon->h = noeud->fils_droit->h;
 
-    new_noeud->parent = noeud->parent;
-    noeud->parent = new_noeud;
+    free(noeud->fils_droit);
+    noeud->fils_droit = NULL;
+    noeud->fils_droit = tampon->fils_gauche;
+    tampon->fils_gauche = noeud;
+
+
+    tampon->parent = noeud->parent;
+    if(tampon->parent){
+        if(strcmp(tampon->parent->cle, tampon->cle)>0)
+            tampon->parent->fils_gauche = tampon;
+        else 
+            tampon->parent->fils_droit = tampon;
+    } 
+    noeud->parent = tampon;
+    tampon->fils_droit->parent = tampon;
 
     ajustement_hauteur(noeud);
-    
+    ajustement_hauteur(tampon);
 
-    return new_noeud;
+    return tampon;
 }
 
 static void equilibrague_arbre(Noeud *noeud){
@@ -132,9 +172,9 @@ static void equilibrague_arbre(Noeud *noeud){
     while(noeud){
         balance = 0, h_droite = 0, h_gauche = 0;
         if(noeud->fils_droit)
-            balance += noeud->fils_droit->h;
+            balance += noeud->fils_droit->h + 1;
         if(noeud->fils_gauche)
-            balance -= noeud->fils_gauche->h;
+            balance -= noeud->fils_gauche->h + 1;
         if(balance>1){
             if(noeud->fils_droit->fils_droit)
                 h_droite = noeud->fils_droit->fils_droit->h + 1;
@@ -172,10 +212,8 @@ static void ajustement_hauteur(Noeud *noeud){
         */
         if(h_gauche>h_droite)
             noeud->h = h_gauche;
-        else if(h_gauche<h_droite)
+        else if(h_gauche<=h_droite)
             noeud->h = h_droite;
-        else 
-            break;
 
     noeud = noeud->parent;
     }
@@ -188,8 +226,7 @@ insert_t insertInSet(Set* set, char* element){
 
     //recherche du noeud devant recevoir un nouveau fils
     while(actuel){
-        comparaison = strcmp(element, actuel->cle);
-        if(comparaison>0){
+        if(strcmp(element, actuel->cle)>0){
             if(actuel->fils_droit==NULL){
                fils = 1;
                break;  
@@ -216,6 +253,7 @@ insert_t insertInSet(Set* set, char* element){
     new->h = 0;
     if(!actuel){
         set->racine=new;
+        set->taille++;
         return NEW;
     }
     
@@ -225,9 +263,11 @@ insert_t insertInSet(Set* set, char* element){
     else
         actuel->fils_gauche = new;
     set->taille++;
-
     ajustement_hauteur(actuel);
     equilibrague_arbre(actuel);
+
+    while(set->racine->parent)
+        set->racine = set->racine->parent;
 
     return NEW;
 }
@@ -256,10 +296,8 @@ StringArray* setIntersection(const Set* set1, const Set* set2){
 
 static void affichage_arbre(Noeud *noeud, int h){
     printf("%s\t%ld\n", noeud->cle, noeud->h);
-    if(noeud->fils_gauche){
-        printf("jeanne au secours\n");
+    if(noeud->fils_gauche)
         affichage_arbre(noeud->fils_gauche, h+1);
-    }
     if(noeud->fils_droit)
         affichage_arbre(noeud->fils_droit, h+1);
 }
@@ -270,7 +308,9 @@ void test_affichage(const StringArray *test){
     for(size_t i = 0; i<taille; i++){
         insertInSet(arbre_test, getElementInArray(test, i));
     }
-
     affichage_arbre(arbre_test->racine, 0);
-}
 
+    printf("%d\n", sizeOfSet(arbre_test));
+
+    freeSet(arbre_test);
+}
