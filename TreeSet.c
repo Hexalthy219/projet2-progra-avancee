@@ -109,7 +109,6 @@ static Noeud *rotation_droite(Noeud *noeud){
     tampon->h = noeud->fils_gauche->h;
 
 
-
     // Noeud *new_noeud = noeud->fils_gauche;
     free(noeud->fils_gauche);
     noeud->fils_gauche = NULL;
@@ -126,10 +125,10 @@ static Noeud *rotation_droite(Noeud *noeud){
     }
     if (noeud->fils_gauche)
         noeud->fils_gauche->parent = noeud;
-    tampon->fils_gauche->parent = tampon;
+    if(tampon->fils_gauche)
+        tampon->fils_gauche->parent = tampon;
     
     ajustement_hauteur(noeud);
-    ajustement_hauteur(tampon);
     
     return tampon;
 }
@@ -159,12 +158,12 @@ static Noeud *rotation_gauche(Noeud *noeud){
         else 
             tampon->parent->fils_droit = tampon;
     }
-    if (noeud->fils_droit)
+    if(noeud->fils_droit)
         noeud->fils_droit->parent = noeud;
-    tampon->fils_droit->parent = tampon;
+    if (tampon->fils_droit)
+        tampon->fils_droit->parent = tampon;
 
     ajustement_hauteur(noeud);
-    ajustement_hauteur(tampon);
 
     return tampon;
 }
@@ -174,29 +173,21 @@ static void equilibrague_arbre(Noeud *noeud){
     size_t h_droite, h_gauche;
 
     while(noeud){
-        printf("test1\n");
         balance = 0, h_droite = 0, h_gauche = 0;
-        if(noeud->fils_droit){
+        if(noeud->fils_droit)
             balance += noeud->fils_droit->h + 1;
-            printf("%zd\n", noeud->fils_droit->h);
-        }
-        if(noeud->fils_gauche){
+        if(noeud->fils_gauche)
             balance -= noeud->fils_gauche->h + 1;
-            printf("%zd\n", noeud->fils_gauche->h);
-        }
-        printf("%d\n", balance);
         if(balance>1){
             if(noeud->fils_droit->fils_droit)
                 h_droite = noeud->fils_droit->fils_droit->h + 1;
             if(noeud->fils_droit->fils_gauche)
                 h_gauche = noeud->fils_droit->fils_gauche->h + 1;
-            if(h_gauche>h_droite)
-                rotation_droite(noeud->fils_droit);
-            printf("test2\n");
+            if(h_gauche>h_droite){
+                rotation_droite(noeud->fils_droit);}
             noeud = rotation_gauche(noeud);
         }
         else if(balance<-1){
-            printf("test3\n");
             if(noeud->fils_gauche->fils_droit)
                 h_droite = noeud->fils_gauche->fils_droit->h + 1;
             if(noeud->fils_gauche->fils_gauche)
@@ -206,16 +197,13 @@ static void equilibrague_arbre(Noeud *noeud){
             noeud = rotation_droite(noeud);
         }
         noeud = noeud->parent;
-        printf("test4\n");
     }
 }
 
 static void ajustement_hauteur(Noeud *noeud){
     size_t h_droite = 0, h_gauche = 0;
-    printf("ajustement hauteur\n");
     while(noeud){
         h_droite = 0, h_gauche = 0;
-        printf("%s\n", noeud->cle);
         if(noeud->fils_droit)
             h_droite = noeud->fils_droit->h + 1;
         if(noeud->fils_gauche)
@@ -230,8 +218,7 @@ static void ajustement_hauteur(Noeud *noeud){
             noeud->h = h_gauche;
         else if(h_gauche<=h_droite)
             noeud->h = h_droite;
-    printf("hauteur : %zd", noeud->h);
-    noeud = noeud->parent;
+        noeud = noeud->parent;
     }
 }   
 
@@ -322,21 +309,8 @@ static void affichage_arbre(Noeud *noeud, int h){
 void test_affichage(const StringArray *test){
     Set *arbre_test = createEmptySet();
     size_t taille = arrayLength(test);
-    for(size_t i = 0; i<19; i++){
-        printf("%zd\n\n", i+1);
+    for(size_t i = 0; i<taille; i++){
         insertInSet(arbre_test, getElementInArray(test, i));
-        affichage_arbre(arbre_test->racine, 0);
-        printf("\n\n");
-
-        // printf("racine : %s\n", arbre_test->racine->cle);
-        // if (arbre_test->racine->fils_droit){
-        //     printf("fils_droit : %s\n", arbre_test->racine->fils_droit->cle);
-        //     printf("parent fils-droit : %s\n", arbre_test->racine->fils_droit->parent->cle);
-        //     if (arbre_test->racine->fils_droit->fils_gauche){
-        //         printf("fils droit fils gauche : %s\n", arbre_test->racine->fils_droit->fils_gauche->cle);
-        //         printf("parent fils droit fils gauche : %s\n", arbre_test->racine->fils_droit->fils_gauche->parent->cle);
-        //     }
-        // }
     }
     affichage_arbre(arbre_test->racine, 0);
 
