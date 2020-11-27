@@ -5,6 +5,7 @@
  * ========================================================================= */
 
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "StringArray.h"
 #include "Set.h"
@@ -99,10 +100,6 @@ void shuffleArray(StringArray* array)
   }
 }
 
-StringArray* getIntersection(const StringArray* array1, const StringArray* array2){
-  test_affichage(array1);
-  
-  return NULL;
-}
+
 
 

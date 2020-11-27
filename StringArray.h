@@ -104,7 +104,7 @@ void shuffleArray(StringArray* array);
  * array        A new StringArray object that contains the common elements
  * NULL         if an error occured
  * ------------------------------------------------------------------------- */
-StringArray* getIntersection(const StringArray* array1, const StringArray* array2);
+StringArray* getIntersection(const StringArray* array1, StringArray* array2);
 
 
 

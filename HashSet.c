@@ -22,6 +22,38 @@ static size_t fonction_h(const char *elem, size_t m);
 
 static void freelist(Liste *liste);
 
+static int rehachage(Set *set);
+
+static int rehachage(Set *set){
+    Liste **tableau = calloc(set->taille*2, sizeof(Liste*));
+    if(!tableau)
+        return -1;
+    Liste *intermediaire, *tampon;
+    size_t pos;
+
+    for(size_t i = 0; i<set->taille; i++){
+        intermediaire = set->tableau[i];
+        while(intermediaire){
+            pos = fonction_h(intermediaire->cle, set->taille*2);            
+            tampon = tableau[pos];
+            while(tampon && tampon->suivant)
+                tampon = tampon->suivant;
+
+            if(!tampon)
+                tampon = intermediaire;
+            else
+                tampon->suivant = intermediaire;
+
+            intermediaire = intermediaire->suivant;
+        }
+        free(set->tableau[i]);
+    }
+    free(set->tableau);
+    set->tableau = tableau;
+    set->taille *= 2;
+    return 0;
+}
+
 static size_t fonction_h(const char *elem, size_t m){
     size_t pos = 0;
     unsigned int i= 0;
@@ -46,7 +78,7 @@ Set *createEmptySet(void){
     if(!dict)
         return NULL;
     dict->tableau = NULL;
-    dict->taille = 0;
+    dict->taille = 64;
     
     return dict;
 }
@@ -73,9 +105,12 @@ size_t sizeOfSet(const Set *set){
 insert_t insertInSet(Set *set, char *element){
     if(!set)
         return ALLOC_ERROR;
+
+    if(set->nbr_elem == set->taille)
+        rehachage(set);
     
     if(!set->tableau || !set->taille)
-        set->tableau = calloc(set->taille, sizeof(Liste));
+        set->tableau = calloc(set->taille, sizeof(Liste*));
     if(!set->tableau)
         return ALLOC_ERROR;
     
@@ -110,35 +145,29 @@ bool contains(const Set *set, const char *element){
     size_t pos = fonction_h(element, set->taille);
     Liste *tampon = set->tableau[pos];
     while(tampon){
-        if(strcmp(element, tampon->cle))
+        if(!strcmp(element, tampon->cle))
             return true;
         tampon = tampon->suivant;
     }
     return false;
 }
 
-StringArray *setIntersection(const Set *set1, const Set *set2){}
-
-void test_affichage(const StringArray *test){
-    Set *table_test = createEmptySet();
-    if(!table_test)
-        return;
-    table_test->taille = arrayLength(test);
-    size_t i;
-    for(i = 0; i<table_test->taille; i++){
-        insertInSet(table_test, getElementInArray(test, i));
-    }
+StringArray* setIntersection(const Set* set1, const Set *set2){
+    StringArray *intersection = createEmptyArray();
+    if(!intersection)
+        return NULL;
     
-    i=0;
-    while(i<table_test->taille){
-        Liste *tampon = table_test->tableau[i];
+    Liste *tampon;
+
+    for(size_t i = 0; i<set1->taille; i++){
+        tampon = set1->tableau[i];
         while(tampon){
-            printf("%s\n", tampon->cle);
-            printf("%zd\n", i);
+            if(contains(set2, tampon->cle))
+                insertInArray(intersection, tampon->cle);
             tampon = tampon->suivant;
         }
-            
-        i++;
     }
 
+
+    return intersection;
 }

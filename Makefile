@@ -16,14 +16,14 @@ LDFLAGS =
 # Files
 EXEC = test
 
-MODULES_LISTESET = ListSet.c main.c StringArray.c
-OBJECTS_LISTESET = ListSet.o main.o StringArray.o
+MODULES_LISTESET = ListSet.c main.c StringArray.c Intersection.c
+OBJECTS_LISTESET = ListSet.o main.o StringArray.o Intersection.o
 
-MODULES_TREESET = TreeSet.c main.c StringArray.c
-OBJECTS_TREESET = TreeSet.o main.o StringArray.o
+MODULES_TREESET = TreeSet.c main.c StringArray.c Intersection.c
+OBJECTS_TREESET = TreeSet.o main.o StringArray.o Intersection.o
 
-MODULES_HASHSET = HashSet.c main.c StringArray.c
-OBJECTS_HASHSET = HashSet.o main.o StringArray.o
+MODULES_HASHSET = HashSet.c main.c StringArray.c Intersection.c
+OBJECTS_HASHSET = HashSet.o main.o StringArray.o Intersection.o
 
 
 ## Rules
@@ -51,6 +51,9 @@ ListSet.o: ListSet.c
 
 TreeSet.o: TreeSet.c
 	$(CC) -c TreeSet.c -o TreeSet.o $(CFLAGS)
+
+Intersection.o: Intersection.c
+	$(CC) -c Intersection.c -o Intersection.o $(CFLAGS)
 
 HashSet.o: HashSet.c
 	$(CC) -c HashSet.c -o HashSet.o $(CFLAGS)

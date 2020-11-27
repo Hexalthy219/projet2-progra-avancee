@@ -63,6 +63,8 @@ static Noeud *rotation_gauche(Noeud *noeud);
  * ------------------------------------------------------------------------- */
 static void ajustement_hauteur(Noeud *noeud);
 
+static void intersection(Noeud *noeud1, const Set *set2, StringArray *array);
+
 
 Set* createEmptySet(void){
     Set *dict = malloc(sizeof(Set));
@@ -229,20 +231,24 @@ insert_t insertInSet(Set* set, char* element){
 
     //recherche du noeud devant recevoir un nouveau fils
     while(actuel){
-        if(strcmp(element, actuel->cle)>0){
+        comparaison = strcmp(element, actuel->cle);
+        if(comparaison>0){
             if(actuel->fils_droit==NULL){
                fils = 1;
                break;  
             }
             actuel = actuel->fils_droit;  
         }
-        else{
+        else if (comparaison<0){
             if(actuel->fils_gauche==NULL){
                fils = -1;
                break;  
             }
             actuel = actuel->fils_gauche;
         }
+        else
+            return OLD;
+        
     }
     //création du nouveau noeud
     Noeud *new = malloc(sizeof(Noeud));
@@ -291,29 +297,23 @@ bool contains(const Set* set, const char* element){
     return false;
 }
 
-StringArray* setIntersection(const Set* set1, const Set* set2){
-
-
+static void intersection(Noeud *noeud1, const Set *set2, StringArray *array){
+    if(noeud1->fils_droit)
+        intersection(noeud1->fils_droit, set2, array);
+    if(noeud1->fils_gauche)
+        intersection(noeud1->fils_gauche, set2, array);
     
+    if(contains(set2, noeud1->cle))
+        insertInArray(array, noeud1->cle);
 }
 
-static void affichage_arbre(Noeud *noeud, int h){
-    printf("%s\n", noeud->cle);
-    printf("%zd\n", noeud->h);
-    if(noeud->fils_gauche)
-        affichage_arbre(noeud->fils_gauche, h+1);
-    if(noeud->fils_droit)
-        affichage_arbre(noeud->fils_droit, h+1);
-}
-
-void test_affichage(const StringArray *test){
-    Set *arbre_test = createEmptySet();
-    size_t taille = arrayLength(test);
-    for(size_t i = 0; i<taille; i++){
-        insertInSet(arbre_test, getElementInArray(test, i));
-    }
-    affichage_arbre(arbre_test->racine, 0);
-
+StringArray* setIntersection(const Set* set1, const Set *set2){
+    StringArray *array = createEmptyArray();
+    if(!array)
+        return NULL;
     
-    freeSet(arbre_test);
+    if(set1->racine)
+        intersection(set1->racine, set2, array);
+
+    return array;
 }

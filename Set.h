@@ -95,18 +95,13 @@ bool contains(const Set* set, const char* element);
  *
  * PARAMETERS
  * set1     A valid pointer to a set object
- * set2     A valid pointer to a set object
+ * set2     A valid pointer to a stringarray
  *
  * RETURN
  * StringArray  A new pointer to a StringArray object holding the intersection
  * NULL         If an error occured.
  * ------------------------------------------------------------------------- */
-StringArray* setIntersection(const Set* set1, const Set* set2);
-
-
-
-void test_affichage(const StringArray *test);
-
+StringArray* setIntersection(const Set* set1, const Set *set2);
 
 
 
