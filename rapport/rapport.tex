@@ -162,60 +162,37 @@ hachage, nous procédons à un réhachage dans le cas où le nombre d'élément 
 la taille du tableau ce qui correspondrait dans le meilleur des cas, à ce stade là,
 à un tableau de n cases contenant chacune une liste de une cellule. Si nous dépassons cette limite, 
 nous doublons la taille du tableau et nous replacons tous les éléments déjà insérés à leur 
-place dans le nouveau tableau. Nous en venons donc à notre fonction de hachage. Celle-ci 
-correspond à une somme des caractères multiplié par 128 exposant la position de ce caractère 
-dans la chaine de caractères. Le tout, modulo la taille actuelle du tableau. D'où le fait 
-que nous devons repasser tous les éléments déjà insérés dans la fonction de hachage avec 
-la nouvelle taille de tableau, afin de revoir sa postion dans celui-ci.\\
+place dans le nouveau tableau. 
+Nous en venons donc à notre fonction de hachage. Celle-ci 
+correspond à la formule suivante :
+$$\sum_{i=0}^{n}(elem[i]*727^i)\%m$$ avec 
+\begin{itemize}
+  \item elem, la chaine caractère
+  \item n, le nombre de caractère dans elem
+  \item m, la taille du tableau de liste du set
+\end{itemize}
+D'où le fait que nous devons repasser tous les éléments déjà 
+insérés dans la fonction de hachage avec la nouvelle taille de 
+tableau, afin de revoir sa postion dans celui-ci.\\
 
 Enfin, notre fonction "contains", permet de vérifier l'existence d'un élément 
 en utilisant, l'utilité principale d'une table de hachage, l'accès direct. Nous passons donc 
-l'élément dans notre fonction de hachage et vérifiant les éléments(s'il y en a) à la position 
+l'élément dans notre fonction de hachage et vérifions les éléments(s'il y en a) à la position 
 du tableau que nous a renvoyé notre fonction de hachage.
 
 \subsection{\textbf{Fonction d'Intersection}}
 (1.1.b)\\
-\begin{itemize}
-  \item Arbre Binaire
-  Pour l'arbre binaire, le principe consiste à parcourir tous les éléments du premier 
-  set dans une fonction récursive et pour chaque élément utiliser la fonction contains 
-  pour vérifier si l'élément existe de le second arbre.
-  \item Table de Hash
-  La table de hash utilise un principe similaire, on parcours les éléments de la première 
-  table de hash, et on utilise la fonction contains sur l'autre table pour chaque élément.
-\end{itemize}
-\subsection{\textbf{ Complexité "SetIntersection"}}
-\subsubsection{Pire cas}
-(1.1.c)\\
-\begin{itemize}
-  \item Arbre Binaire 
-  Nous parcourons le premier arbre($N_B$) et pour chaque élément nous devons 
-  descendre jusqu'en bas de l'arbre à chaque fois dans le pire cas, donc $log(N_A)$.
-  Ce qui nous donne comme complexité en pire cas $\Theta(n*log(n))$.
-  \item Table de Hash
-  Le pire cas pour les tables de hash serait si tous les éléments des tables
-  se trouve dans une même liste chainée. La table dans laquelle nous allons 
-  faire la recherche de l'élément est la table qui impacte le plus cette complexité. 
-  En effet, la fonction "contains" devrait en pire cas parcourir, pour chaque éléments 
-  de la première table, tous les éléments de la liste dans la seconde table. En faisant,
-  l'hypothèse évidemment que pour ce pire cas, chaque élément de la première table 
-  se voit attribué par la fonction de hachage la même valeur que pour les éléments 
-  dans cette unique liste de la 2ème table. Nous aurions donc $N_A*N_B$, c'est à 
-  dire une complexité quadratique.
-\end{itemize}
-\subsubsection{Cas moyen}
-(1.1.d)\\
-\begin{itemize}
-  \item Arbre Binaire
-  Nous savons que la recherche dans un arbre binaire est en moyenne $\Theta(log(n))$.
-  Dès lors, la complexité en cas moyen reste la même, $\Theta(n*log(n))$.
-  \item Table de Hash
-  En moyenne, la fonction de hachage permet une répartition permettant à la fonction 
-  "contains" d'avoir un accès direct et donc constant : $\Theta(1)$. Dès lors, 
-  l'utilisation de cette fonction pour les $N_A$ éléments de la première liste 
-  nous permet d'en conclure une complexité en moyenne linéaire pour la table de Hash.
-\end{itemize}
 
+\subsection{\textbf{ Complexité "SetIntersection"}}
+(1.1.c && 1.1.d)
+Etant donné les choix d'implémentation que nous avons fait et que 
+nous détaillerons dans la seconde section nous n'utilisons pas la 
+fonction "SetIntersection". En effet, au vue de notre choix nous n'avons pas besoin 
+de créer 2 set ce qui est un gain et qui explique que nous ne produisons 
+pas de fonction propre à chaque implémentation et qui ne nous permet pas 
+d'utiliser ces fonctions étant donné que leur définition nous est donné 
+avec 2 set en arguments. Nous utiliserons plutot la fonction GetIntersection 
+directement dans StringArray.c pour établir les intersections.
 
 \section{\textbf{Intersection de deux fichiers}}
 \subsection{\textbf{Complexité minimale}}
