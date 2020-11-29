@@ -17,10 +17,43 @@ struct set_t{
     size_t nbr_elem;
 };
 
+/* ------------------------------------------------------------------------- *
+ * La fonction est une fonction de hachage donc renvoit une certaine valeur 
+ * suivant la formule de hachage choisie porpre à la chaine de 
+ * caractère elem en fonction de la taille m.
+ *
+ * PARAMETERS
+ * elem         pointeur valide vers une chaine de caractères
+ * m            un valeur entière correspond à la taille du tableau de la table de hash
+ * 
+ * RETURN
+ * size_t      un entier correspondant à la valeur pour elem suivant la formule de hachage
+ *
+ * ------------------------------------------------------------------------- */
 static size_t fonction_h(const char *elem, size_t m);
 
+/* ------------------------------------------------------------------------- *
+ * La fonction libère la mémoire de la liste donnée en argument et toutes 
+ * les autres liste suivante chainée à celle-ci
+ *
+ * PARAMETERS
+ * liste        pointeur valide vers une struct Liste       
+ *
+ * ------------------------------------------------------------------------- */
 static void freelist(Liste *liste);
 
+/* ------------------------------------------------------------------------- *
+ * La fonction double la taille de la table contenue dans set et replace 
+ * les éléments s'y trouvant déjà à leur nouvelle position
+ *
+ * PARAMETERS
+ * set          pointeur valide vers une struct Set        
+ *
+ * RETURN
+ * -1     en cas d'erreur
+ * 0      sinon   
+ * 
+ * ------------------------------------------------------------------------- */
 static int rehachage(Set *set);
 
 static int rehachage(Set *set){
@@ -29,7 +62,7 @@ static int rehachage(Set *set){
         return -1;
     Liste *intermediaire, *tampon, *intermediaire_precedent;
     size_t pos;
-
+    
     for(size_t i = 0; i<set->taille; i++){
         intermediaire = set->tableau[i];
         while(intermediaire){
@@ -106,6 +139,7 @@ insert_t insertInSet(Set *set, char *element){
     if(!set)
         return ALLOC_ERROR;
 
+    //rehachage dans le cas où le nombre d'éléménet atteint la taille du set
     if(set->nbr_elem == set->taille)
         rehachage(set);
     
@@ -116,7 +150,7 @@ insert_t insertInSet(Set *set, char *element){
     
     size_t pos = fonction_h(element, set->taille);
     
-
+    //Recherche de l'emplacement où ajouter le nouvel élément et retourne OLD si l'élément existe déjà
     Liste *tampon = set->tableau[pos];
     while(tampon && tampon->suivant){
         if(!strcmp(element, tampon->cle))
@@ -124,6 +158,7 @@ insert_t insertInSet(Set *set, char *element){
         tampon = tampon->suivant;
     }
 
+    //Création et ajout de la nouvelle céllule au tableau
     Liste *nouveau = malloc(sizeof(Liste));
     if(!nouveau)
         return ALLOC_ERROR;

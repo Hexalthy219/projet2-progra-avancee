@@ -174,7 +174,8 @@ int main(int argc, char** argv)
   }
 
   // Compute intersection
-  StringArray* intersection = getIntersection(firstArray, secondArray);
+  StringArray *intersection = getIntersection(firstArray, secondArray);
+  
   if (!intersection)
   {
     printf("An error has occured while computing the files' intersection: \n");
@@ -186,7 +187,7 @@ int main(int argc, char** argv)
   }
 
 
-  // printArray(intersection);
+  printArray(intersection);
 
   // Free memory
   freeArray(firstArray, true);

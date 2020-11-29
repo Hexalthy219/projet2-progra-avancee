@@ -124,11 +124,11 @@ corriger. Nous veillons évidemment aussi à mettre à jour la racine du set en 
 de modification de celle-ci après avoir fait appel à l'équilibrage.\\
 
 Nous en venons donc à la partie la plus importante de cet algorithme qui est 
-l'équilibrage de l'arbre. Pour nous facilitez la tâche, nous avons, comme annoncé 
+l'équilibrage de l'arbre. Pour nous faciliter la tâche, nous avons, comme annoncé 
 précédemment, pour chaque noeud une variable pour la taille max de ses sous-arbres. 
 A chaque insertion, nous utilisons une fonction qui met à jour ces valeurs. Pour ce 
 faire, nous faisons une remontée récursive depuis le nouveau noeud jusqu'à la racine 
-et nous mettons à jour la variable de chaque noeud en comparons les valeurs de 
+et nous mettons à jour la variable de chaque noeud en comparant les valeurs de 
 hauteurs de chaque fils, la nouvelle valeur de hauteur est dorénavant la hauteur du 
 plus grand sous-arbre + 1.\\ 
 
@@ -182,17 +182,60 @@ du tableau que nous a renvoyé notre fonction de hachage.
 
 \subsection{\textbf{Fonction d'Intersection}}
 (1.1.b)\\
-
+Le principe de notre fonction d'intersection correspond à la première approche 
+proposée dans l'énoncé au point 2.2. Nous cherchons l'intersection donc directement 
+depuis la fonction "GetIntersection" dans laquelle nous créons une set pour le 
+plus petit des 2 StringArray. Ensuite, nous parcourons tous les éléments du second 
+StringArray en utilisant la fonction "contains" pour chaque élément dans le set créé 
+du premier StringArray.\\
+Nous considererons pour ce pseudo-code $N_A < N_B$, et A et B des tableaux de 
+chaine de caractère. La fonction "createSet" correspond à l'insertion de tous les 
+éléments d'un tableau en un set. La fonction contains retoune vrai ou faux en fonction 
+de si l'élément donné en second argument existe dans le set donné en premier argument. 
+Et enfin, la fonction add ajoute la chaine de caractère en second argument dans le 
+tableau de chaine de caractère en premier argument.
+\newpage
+\begin{lstlisting}
+  GetIntersection(A, B)
+      setA = createSet(A)
+      for i=1 to B.length
+          if(contains(setA, B.elem))
+              add(intersection, B.elem)
+\end{lstlisting}
 \subsection{\textbf{ Complexité "SetIntersection"}}
-(1.1.c && 1.1.d)
+(1.1.c et 1.1.d)\\
 Etant donné les choix d'implémentation que nous avons fait et que 
 nous détaillerons dans la seconde section nous n'utilisons pas la 
 fonction "SetIntersection". En effet, au vue de notre choix nous n'avons pas besoin 
 de créer 2 set ce qui est un gain et qui explique que nous ne produisons 
 pas de fonction propre à chaque implémentation et qui ne nous permet pas 
 d'utiliser ces fonctions étant donné que leur définition nous est donné 
-avec 2 set en arguments. Nous utiliserons plutot la fonction GetIntersection 
+avec 2 set en arguments. Nous utiliserons plutôt la fonction GetIntersection 
 directement dans StringArray.c pour établir les intersections.
+\subsection{\textbf{Temps d'exécutions}}
+(1.2)\\
+Nous allons maintenant étudier des valeurs de temps d'exécutions. Les valeurs répertoriées 
+dans le tableau ci-dessous sont basées sur 10 tests pour lesquels nous avons mélangé 
+les tableaux French.txt et English.txt entre chaque test. De cette base, nous avons enregistré les temps 
+d'exécution pour la création du set à partir de French.txt sur ses 1000 ou 10000 premiers éléments.
+Nous avons fait de même en répertoriant les temps pour rechercher les intersections entre 
+English.txt et notre set de French.txt ayant 1000 ou 10000 éléments.
+\begin{figure}[h]
+  \centering
+  \begin{tabular}{|l|c|c|c|c|}
+      \cline{1-5}
+      Type d'implémentations&\multicolumn{2}{c|}{Arbre Binaire}&\multicolumn{2}{c|}{Table de Hash}\\
+      \cline{1-5}
+      Taille&$10^3$&$10^4$&$10^3$&$10^4$\\
+      \cline{1-5}
+      Creation Set&0.000535&0.007985&0.000624&0.00779\\
+      Intersection&0.201887&0.221764&0.206211&0.2121\\
+      \cline{1-5}
+  \end{tabular}
+  \caption{Résultats empiriques de temps d'exécution}
+\end{figure}
+\subsection{\textbf{Comparaison avec les résultats théoriques attendus}}
+(1.3)\\
 
 \section{\textbf{Intersection de deux fichiers}}
 \subsection{\textbf{Complexité minimale}}
@@ -201,6 +244,10 @@ La complexité minimale consisterait à trié un des tableaux donc $\Theta(n*log
 faire une recherche dichotomique pour chaque élément de l'autre tableau, également $\Theta(n*log(n))$. 
 Donc au global, $\Theta(n*log(n))$ également.
 \subsection{\textbf{Analyse d'implémentations}}
+Quelle que soit le cas, notre algorithme crée toujours, dans le cas où nous ne faisons qu'un 
+set, le set sur le tableau A étant le plus petit. En effet, la création d'un set est 
+couteux et il est préférable de le faire sur le plus petit dans le cas où nous ne convertisons 
+pas les 2 tableaux en set.
 (2.2.a)\\
 Première approche :
 \begin{itemize}
@@ -215,30 +262,35 @@ Première approche :
 Deuxième approche :
 \begin{itemize}
   \item Arbre Binaire
-  Avoir 2 arbres binaires ne nous apporterait pas grand chose. Tel est la technique que nous 
-  avons utilisé, nous parcourons le premier arbre et cherchons dans le deuxième. Nous 
-  obtenons, comme prouvé dans la précédente section, une complexité $\Theta(n*log(n))$.
-  Un avantage aurait pu être de faire une implémentation se rapprochant du mergesort 
-  comme expliqué au point 2.3 mais nous avons remarqué que pour parcourir l'abre de 
-  manière croissante, nous devrions passé par une fonction permettant d'avoir le successeur 
-  du noeud actuel et ces montées et descente dans l'abre revienne presqu'au même que les 
-  descente que l'on fait lors de notre recherche par la fonction "contains".
+  Cette deuxième approche n'apporterait rien d'interessant en plus étant donné 
+  qu'il faudrait créer un second set et que nous n'avons pas d'algorithme permettant 
+  de prendre avantage au fait que les deux bases de données soient enregistrées 
+  d'une manière particulière. Nous arons donc 2 fois $n*log(n)$ opérations pour 
+  créer les 2 sets et $n*log(n)$ pour la recherche d'intersection.
   \item Table de Hash
-  Pour la table de Hash, même chose, nous parcourerons l'entierté d'une d'entre elles 
-  et le pire cas consiste en tous les éléments de la seconde dans une seule liste 
-  qui implique une complexité quadratique.
+  Même réflexion que pour l'arbre binaire, nous devrions créer 2 tables ce qui n'est 
+  pas gratuit et ne nous avatagerait pas plus pour la recherche d'intersection.
+  En pire cas, nous sommes une nouvelle fois dans une complexité quadratique. Dans 
+  le cas où tous les éléments seraient mal répartis et tous dans une seule et unique liste chainée.
 \end{itemize}
 \subsection{Cas moyen}
 (2.2.c)\\
-Les conclusions que nous avons faite pour le pire cas restent inchangées, et nos 
-complexités correspondent aux complexités en cas moyen exprimée dans nos analyses 
-au point 1.1.d.
+\begin{itemize}
+  \item Arbre Binaire 
+  Etant donné que l'on considère que A et B n'ont pas de doublons, dès lors nous parcourerons 
+  en moyenne $log(n)$ pour atteindre l'élément s'il existe dans le set. Donc toujours 
+  $\Theta(n*log(n))$ comme complexité en cas moyen.
+  \item Table de Hash
+  En moyenne, on considéreras une répartition correct dans la table et donc un accès 
+  $O(1)$ pour la fonction contains. Donc nous aurons en cas moyen une complexité 
+  linéaire pour le calcul de l'intersection.
+\end{itemize}
 \subsection{Pertinence d'approche}
 (2.2.d)\\
 De par les points précédents, il parait plus judicieux de ne créer qu'un seul ensemble. 
 Car le fait d'en créer 2 n'apporte pas grand chose et implique de prendre le temps de 
 créer 2 ensembles qui n'est pas gratuit en mémoire ni en temps. Pour ce qui est du 
-type d'ensemble, l'arbre binaire est dans tous les cas plutot éfficaces avec une complexité 
+type d'ensemble, l'arbre binaire est dans tous les cas plutôt éfficace avec une complexité 
 $\Theta(n*log(n))$. Pour ce qui est de la table de Hash, en moyenne, c'est la plus 
 efficace avec une complexité linéaire, mais elle a en pire cas, bien que peu probable, 
 une complexité $\Theta(n^2)$.
@@ -246,7 +298,7 @@ une complexité $\Theta(n^2)$.
 (2.3)\\
 Nous pourrions procéder d'une manière similaire au mergesort, en effet nous pourrions 
 parcourir les 2 tableaux parallèlement et si l'on trouve un élément similaire on l'ajoute à notre 
-tableau intersection. En terme de complexité, dans le meilleure cas nous ne parcourerions que la plus 
+tableau intersection. En terme de complexité, dans le meilleure cas nous ne parcourerions que le plus 
 petit des 2 tableaux donc $N_A \Theta(n)$. En pire cas, ça serait le même cas qu'un merge de A et B, 
 donc $N_A + N_B$ ce qui revient encore une fois à du $\Theta(n)$.
 
